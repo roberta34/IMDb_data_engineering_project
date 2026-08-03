@@ -87,20 +87,6 @@ dbt_project/logs/
 dbt_project/dbt_packages/
 ```
 
-### Acceptance Criteria
-
-- [ ] Git repository created
-- [ ] Project folder structure created
-- [ ] `.gitignore` configured
-- [ ] Initial README created
-- [ ] First commit pushed
-
-Suggested commit:
-
-```bash
-git commit -m "Initialize IMDb data engineering project"
-```
-
 ---
 
 ## Task 1.2 — Configure Airflow, DuckDB, and dbt
