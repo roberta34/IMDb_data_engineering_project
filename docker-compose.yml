@@ -1,0 +1,179 @@
+x-airflow-common:
+  &airflow-common
+
+  build:
+    context: .
+    dockerfile: Dockerfile
+
+  image: ${AIRFLOW_IMAGE_NAME:-imdb-airflow:3.3.0}
+
+  environment:
+    &airflow-common-env
+
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+      postgresql+psycopg2://airflow:airflow@postgres/airflow
+
+    AIRFLOW__CORE__AUTH_MANAGER: >-
+      airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: >-
+      http://airflow-api-server:8080/execution/
+
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Bucharest
+
+    PYTHONPATH: /opt/airflow
+
+  volumes:
+    &airflow-common-volumes
+
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./config:/opt/airflow/config
+    - ./config/dbt:/home/airflow/.dbt
+    - ./plugins:/opt/airflow/plugins
+    - ./raw:/opt/airflow/raw
+    - ./dbt_project:/opt/airflow/dbt_project
+    - ./warehouse:/opt/airflow/warehouse
+
+  user: "${AIRFLOW_UID:-50000}:0"
+
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: imdb-postgres
+
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    restart: unless-stopped
+
+
+  airflow-init:
+    <<: *airflow-common
+
+    container_name: imdb-airflow-init
+
+    environment:
+      <<: *airflow-common-env
+
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-admin}
+
+    command:
+      - bash
+      - -c
+      - |
+          set -e
+
+          echo "Migrating the Airflow metadata database..."
+          airflow db migrate
+
+          echo "Migrating the FAB authentication database..."
+          airflow fab-db migrate
+
+          if airflow users list | grep -q "$${_AIRFLOW_WWW_USER_USERNAME}"; then
+            echo "FAB user already exists. Resetting password..."
+
+            airflow users reset-password \
+              --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
+              --password "$${_AIRFLOW_WWW_USER_PASSWORD}"
+          else
+            echo "Creating FAB admin user..."
+
+            airflow users create \
+              --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
+              --password "$${_AIRFLOW_WWW_USER_PASSWORD}" \
+              --firstname IMDb \
+              --lastname Admin \
+              --role Admin \
+              --email admin@example.com
+          fi
+
+          echo "Airflow initialization completed successfully."
+
+    restart: "no"
+
+
+  airflow-api-server:
+    <<: *airflow-common
+
+    container_name: imdb-airflow-api-server
+
+    command: api-server
+
+    ports:
+      - "8585:8080"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:8080/api/v2/monitor/health"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    restart: unless-stopped
+
+
+  airflow-scheduler:
+    <<: *airflow-common
+
+    container_name: imdb-airflow-scheduler
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      airflow-api-server:
+        condition: service_healthy
+
+    command: scheduler
+
+    restart: unless-stopped
+
+
+  airflow-dag-processor:
+    <<: *airflow-common
+
+    container_name: imdb-airflow-dag-processor
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      airflow-api-server:
+        condition: service_healthy
+
+    command: dag-processor
+
+    restart: unless-stopped
+
+
+volumes:
+  postgres-db-volume:

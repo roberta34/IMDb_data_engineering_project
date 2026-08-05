@@ -6,3 +6,7 @@ __pycache__/
 dbt_project/target/
 dbt_project/logs/
 dbt_project/dbt_packages/
+logs/
+config/
+plugins/
+config/simple_auth_manager_passwords.json
