@@ -5,7 +5,7 @@ x-airflow-common:
     context: .
     dockerfile: Dockerfile
 
-  image: ${AIRFLOW_IMAGE_NAME:-imdb-airflow:3.3.0}
+  image: ${AIRFLOW_IMAGE_NAME:-imdb-airflow:2.11.2}
 
   environment:
     &airflow-common-env
@@ -14,12 +14,6 @@ x-airflow-common:
 
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
       postgresql+psycopg2://airflow:airflow@postgres/airflow
-
-    AIRFLOW__CORE__AUTH_MANAGER: >-
-      airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-
-    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: >-
-      http://airflow-api-server:8080/execution/
 
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
@@ -86,20 +80,17 @@ services:
       - |
           set -e
 
-          echo "Migrating the Airflow metadata database..."
+          echo "Migrating Airflow metadata database..."
           airflow db migrate
 
-          echo "Migrating the FAB authentication database..."
-          airflow fab-db migrate
-
           if airflow users list | grep -q "$${_AIRFLOW_WWW_USER_USERNAME}"; then
-            echo "FAB user already exists. Resetting password..."
+            echo "User already exists. Resetting password..."
 
             airflow users reset-password \
               --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
               --password "$${_AIRFLOW_WWW_USER_PASSWORD}"
           else
-            echo "Creating FAB admin user..."
+            echo "Creating Airflow admin user..."
 
             airflow users create \
               --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
@@ -115,24 +106,18 @@ services:
     restart: "no"
 
 
-  airflow-api-server:
+  airflow-webserver:
     <<: *airflow-common
 
-    container_name: imdb-airflow-api-server
+    container_name: imdb-airflow-webserver
 
-    command: api-server
+    command: webserver
 
     ports:
       - "8585:8080"
 
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "--fail",
-          "http://localhost:8080/api/v2/monitor/health"
-        ]
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -150,27 +135,21 @@ services:
       postgres:
         condition: service_healthy
 
-      airflow-api-server:
+      airflow-webserver:
         condition: service_healthy
 
     command: scheduler
 
-    restart: unless-stopped
-
-
-  airflow-dag-processor:
-    <<: *airflow-common
-
-    container_name: imdb-airflow-dag-processor
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-      airflow-api-server:
-        condition: service_healthy
-
-    command: dag-processor
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "airflow jobs check --job-type SchedulerJob --hostname \"$${HOSTNAME}\""
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
     restart: unless-stopped
 

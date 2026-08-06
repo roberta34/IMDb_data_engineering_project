@@ -4,4 +4,3 @@ dbt-duckdb
 pandas
 pyarrow
 requests
-apache-airflow-providers-fab

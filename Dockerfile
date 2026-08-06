@@ -1,7 +1,5 @@
-FROM apache/airflow:3.3.0
+FROM apache/airflow:2.11.2
 
 COPY requirements.txt /requirements.txt
 
-RUN pip install --no-cache-dir \
-    "apache-airflow==3.3.0" \
-    -r /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt

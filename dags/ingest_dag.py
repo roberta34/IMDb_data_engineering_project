@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from airflow.sdk import DAG
-from airflow.providers.standard.operators.python import PythonOperator
+from airflow import DAG
+from airflow.operators.python import PythonOperator
 
 
 def verify_environment() -> None:
@@ -11,7 +11,7 @@ def verify_environment() -> None:
 with DAG(
     dag_id="imdb_environment_test",
     start_date=datetime(2026, 8, 1),
-    schedule=None,
+    schedule_interval=None,
     catchup=False,
     tags=["imdb", "setup"],
 ) as dag:
