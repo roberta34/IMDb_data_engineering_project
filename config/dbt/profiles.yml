@@ -1,0 +1,9 @@
+imdb_data_engineering:
+  target: dev
+
+  outputs:
+    dev:
+      type: duckdb
+      path: /opt/airflow/warehouse/warehouse.duckdb
+      threads: 4
+      schema: main

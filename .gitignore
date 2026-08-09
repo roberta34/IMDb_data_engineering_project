@@ -1,5 +1,10 @@
-raw/
+raw/*
+!raw/.gitkeep
+*.tsv
+*.tsv.gz
+*.parquet
 *.duckdb
+*.duckdb.wal
 logs/
 .env
 __pycache__/
@@ -7,6 +12,7 @@ dbt_project/target/
 dbt_project/logs/
 dbt_project/dbt_packages/
 logs/
-config/
 plugins/
 config/simple_auth_manager_passwords.json
+config/dbt/.user.yml
+.idea/

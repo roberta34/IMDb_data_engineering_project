@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_title_ratings
+    description: Clean staging model for IMDb title ratings.
+
+    columns:
+      - name: title_id
+        description: Unique IMDb title identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: average_rating
+        description: IMDb average rating.
+        data_tests:
+          - not_null
+
+      - name: num_votes
+        description: Number of votes received by the title.
+        data_tests:
+          - not_null
