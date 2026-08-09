@@ -8,6 +8,8 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+import duckdb
+
 from dbt.adapters.record.cursor import description
 
 RAW_DIR = Path("/opt/airflow/raw")
@@ -17,6 +19,8 @@ TITLE_RATINGS_SOURCE = DOWNLOAD_DIR / "title.ratings.tsv.gz"
 
 TITLE_RATINGS_PARQUET = RAW_DIR / "title.ratings.parquet"
 TITLE_RATINGS_TEMP_PARQUET = RAW_DIR / "title.ratings.tmp.parquet"
+
+WAREHOUSE_PATH = Path("/opt/airflow/warehouse/warehouse.duckdb")
 
 def prepare_directories() -> None:
     """Create the directories required by the ingestion pipeline."""
@@ -190,6 +194,35 @@ def validate_title_ratings_parquet() -> None:
     print(f"Invalid ratings: {invalid_ratings}")
     print(f"Invalid vote counts: {invalid_vote_counts}")
 
+
+def register_title_ratings_in_duckdb() -> None:
+    """Expose the title ratings Parquet file as a DuckDB view."""
+
+    if not TITLE_RATINGS_PARQUET.exists():
+        raise FileNotFoundError(
+            f"Parquet file not found: {TITLE_RATINGS_PARQUET}"
+        )
+    connection = duckdb.connect(str(WAREHOUSE_PATH))
+
+    connection.execute("CREATE SCHEMA IF NOT EXISTS raw")
+
+    connection.execute(
+        f"""
+        CREATE OR REPLACE VIEW raw.title_ratings AS
+        SELECT * 
+        FROM read_parquet('{TITLE_RATINGS_PARQUET}')
+        """
+    )
+
+    row_count = connection.execute(
+        "SELECT COUNT(*) FROM raw.title_ratings"
+    ).fetchone()[0]
+
+    connection.close()
+
+    print("DuckDB view raw.title_ratings created successfully")
+    print(f"Rows available in DuckDB: {row_count:,}")
+
 default_args = {
     "owner" : "airflow",
     "retries" : 1,
@@ -226,9 +259,15 @@ with DAG(
         python_callable = validate_title_ratings_parquet,
     )
 
+    register_duckdb_sources_task = PythonOperator(
+        task_id = "register_title_ratings_in_duckdb",
+        python_callable = register_title_ratings_in_duckdb,
+    )
+
     (
         prepare_directories_task
         >> validate_source_task
         >> convert_to_parquet_task
         >> validate_parquet_task
+        >> register_duckdb_sources_task
     )

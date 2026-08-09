@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: imdb_raw
+    description: Raw IMDb datasets exposed through DuckDB.
+    schema: raw
+
+    tables:
+      - name: title_ratings
+        description: Raw IMDb title ratings data loaded from Parquet.
