@@ -633,7 +633,6 @@ Thumbs.db
 - [ ] Implement `title.ratings` vertical slice
 - [ ] Ingest all six IMDb sources
 - [ ] Convert raw data to Parquet
-- [ ] Load data into DuckDB
 - [ ] Implement validation and idempotency
 - [ ] Start documentation
 
