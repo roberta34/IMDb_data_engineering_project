@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from pathlib import Path
+from airflow.utils.task_group import TaskGroup
 
 import duckdb
 from airflow import DAG
@@ -320,30 +321,33 @@ with DAG(
         python_callable=prepare_directories,
     )
 
-    validate_source_task = PythonOperator(
-        task_id="validate_imdb_sources",
-        python_callable=validate_imdb_sources,
-    )
+    with TaskGroup(group_id="extract") as extract_group:
+        validate_source_task = PythonOperator(
+            task_id="validate_imdb_sources",
+            python_callable=validate_imdb_sources,
+        )
 
-    convert_to_parquet_task = PythonOperator(
-        task_id="convert_imdb_sources_to_parquet",
-        python_callable=convert_imdb_sources_to_parquet,
-    )
+    with TaskGroup(group_id="convert") as convert_group:
+        convert_to_parquet_task = PythonOperator(
+            task_id="convert_imdb_sources_to_parquet",
+            python_callable=convert_imdb_sources_to_parquet,
+        )
 
-    validate_parquet_task = PythonOperator(
-        task_id="validate_imdb_parquet_files",
-        python_callable=validate_imdb_parquet_files,
-    )
-
-    register_duckdb_sources_task = PythonOperator(
-        task_id="register_imdb_sources_in_duckdb",
-        python_callable=register_imdb_sources_in_duckdb,
-    )
+    with TaskGroup(group_id="validate") as validate_group:
+        validate_parquet_task = PythonOperator(
+            task_id="validate_imdb_parquet_files",
+            python_callable=validate_imdb_parquet_files,
+        )
+    with TaskGroup(group_id="load") as load_group:
+        register_duckdb_sources_task = PythonOperator(
+            task_id="register_imdb_sources_in_duckdb",
+            python_callable=register_imdb_sources_in_duckdb,
+        )
 
     (
         prepare_directories_task
-        >> validate_source_task
-        >> convert_to_parquet_task
-        >> validate_parquet_task
-        >> register_duckdb_sources_task
+        >> extract_group
+        >> convert_group
+        >> validate_group
+        >> load_group
     )
