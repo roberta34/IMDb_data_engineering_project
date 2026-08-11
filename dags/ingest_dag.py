@@ -155,6 +155,17 @@ def convert_imdb_sources_to_parquet() -> None:
                     f"{temp_parquet_path}"
                 )
 
+        except Exception:
+            if temp_parquet_path.exists():
+                temp_parquet_path.unlink()
+
+                print(
+                    f"Removed temporary file after failed conversion: "
+                    f"{temp_parquet_path}"
+                )
+
+            raise
+
         finally:
             connection.close()
 
