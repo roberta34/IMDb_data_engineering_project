@@ -32,6 +32,7 @@ x-airflow-common:
     - ./raw:/opt/airflow/raw
     - ./dbt_project:/opt/airflow/dbt_project
     - ./warehouse:/opt/airflow/warehouse
+    - ./scripts:/opt/airflow/scripts
 
   user: "${AIRFLOW_UID:-50000}:0"
 
