@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: int_title_directors
+    description: Exploded relationship between IMDb titles and directors.
+
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+        data_tests:
+          - not_null
+
+      - name: director_id
+        description: IMDb person identifier for a director.
+        data_tests:
+          - not_null
+
+
+  - name: int_title_writers
+    description: Exploded relationship between IMDb titles and writers.
+
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+        data_tests:
+          - not_null
+
+      - name: writer_id
+        description: IMDb person identifier for a writer.
+        data_tests:
+          - not_null
+
+  - name: int_person_known_for
+    description: Exploded relationship between IMDb people and the titles they are known for.
+
+    columns:
+      - name: person_id
+        description: IMDb person identifier.
+        data_tests:
+          - not_null
+
+      - name: title_id
+        description: IMDb title identifier.
+        data_tests:
+          - not_null
