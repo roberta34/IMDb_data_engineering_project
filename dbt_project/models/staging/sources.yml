@@ -2,9 +2,27 @@ version: 2
 
 sources:
   - name: imdb_raw
-    description: Raw IMDb datasets exposed through DuckDB.
-    schema: raw
+    schema: main
+    description: Raw IMDb datasets ingested and converted to Parquet by Airflow.
 
     tables:
+      - name: title_basics
+        description: Raw IMDb title metadata.
+
       - name: title_ratings
-        description: Raw IMDb title ratings data loaded from Parquet.
+        description: Raw IMDb title ratings and vote counts.
+
+      - name: title_crew
+        description: Raw IMDb directors and writers data.
+
+      - name: title_principals
+        description: Raw IMDb principal cast and crew data.
+
+      - name: name_basics
+        description: Raw IMDb person metadata.
+
+      - name: title_akas
+        description: Raw IMDb alternative titles data.
+
+      - name: title_episode
+        description: IMDb source containing episode-to-parent-title relationships.
