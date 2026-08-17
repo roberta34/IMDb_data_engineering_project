@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: bridge_title_genre
+    description: Bridge table connecting IMDb titles to genres.
+
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_title')
+                field: title_id
+
+      - name: genre_key
+        description: Surrogate key referencing dim_genre.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_genre')
+                field: genre_key
+
+  - name: bridge_title_crew
+    description: Bridge table connecting IMDb titles to people and their standardized roles.
+
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_title')
+                field: title_id
+
+      - name: person_id
+        description: IMDb person identifier.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_person')
+                field: person_id
+
+      - name: role
+        description: Standardized role of the person for the title.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['director', 'writer', 'actor']
