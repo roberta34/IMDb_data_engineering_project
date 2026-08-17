@@ -1,0 +1,101 @@
+version: 2
+
+models:
+  - name: dim_title
+    description: >
+      Title dimension containing one row per unique IMDb title.
+      Grain: one row per title_id.
+
+    columns:
+      - name: title_id
+        description: Unique IMDb title identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: primary_title
+        description: Primary title of the IMDb title.
+
+      - name: original_title
+        description: Original title of the IMDb title.
+
+      - name: title_type
+        description: Type of the IMDb title.
+
+      - name: is_adult
+        description: Indicates whether the title is adult content.
+
+      - name: start_year
+        description: Release or start year of the title.
+
+      - name: end_year
+        description: End year of the title, mainly applicable to series.
+
+      - name: runtime_minutes
+        description: Runtime of the title in minutes.
+
+      - name: genres
+        description: Original comma-separated genre list associated with the title.
+
+  - name: dim_person
+    description: >
+      Person dimension containing one row per unique IMDb person.
+      Grain: one row per person_id.
+
+    columns:
+      - name: person_id
+        description: Unique IMDb person identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: primary_name
+        description: Primary name of the person.
+
+      - name: birth_year
+        description: Birth year of the person.
+
+      - name: death_year
+        description: Death year of the person, if applicable.
+
+      - name: primary_professions
+        description: Original comma-separated list of primary professions.
+
+  - name: dim_genre
+    description: >
+      Genre dimension containing one row per unique IMDb genre.
+      Grain: one row per genre_name.
+
+    columns:
+      - name: genre_key
+        description: Stable numeric key assigned to each unique genre.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: genre_name
+        description: Unique IMDb genre name.
+        data_tests:
+          - not_null
+          - unique
+
+  - name: dim_year
+    description: >
+      Year dimension containing one row per unique year present in IMDb title data.
+      Grain: one row per year.
+
+    columns:
+      - name: year_key
+        description: Primary key of the year dimension, equal to the calendar year.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: year
+        description: Calendar year.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: decade
+        description: Decade associated with the year.
