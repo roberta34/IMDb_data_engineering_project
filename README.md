@@ -645,6 +645,27 @@ Thumbs.db
 - [ ] Build `fct_title_ratings`
 - [ ] Implement ratings snapshot
 - [ ] Implement `dim_title` SCD Type 2
+
+A dbt snapshot was implemented for `dim_title` using `title_id` as the unique key and the `check` strategy.
+
+The following descriptive attributes are tracked:
+
+- `primary_title`
+- `genres`
+- `runtime_minutes`
+
+A controlled change test was performed using title `tt0000001` (`Carmencita`).
+
+1. The initial value of `runtime_minutes` was `1`.
+2. The first snapshot was executed, creating the initial version.
+3. The source value was temporarily changed from `1` to `2`.
+4. The snapshot was executed again.
+5. Two historical versions were observed:
+   - the original version (`runtime_minutes = 1`) received a non-null `dbt_valid_to`;
+   - the new version (`runtime_minutes = 2`) had `dbt_valid_to = NULL`, identifying it as the current record.
+6. The original source data was restored after the test.
+
+This confirms that historical versions of title metadata are preserved using SCD Type 2 semantics.
 - [ ] Add dbt tests
 - [ ] Integrate dbt into Airflow
 
