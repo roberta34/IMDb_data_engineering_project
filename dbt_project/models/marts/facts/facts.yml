@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: fct_title_ratings
+    description: >
+      Fact table containing IMDb rating measures.
+      The grain is one row per IMDb title.
+
+    columns:
+      - name: title_id
+        description: Unique IMDb title identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: year_key
+        description: Year associated with the title, referencing dim_year.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_year')
+                field: year_key
+
+      - name: average_rating
+        description: IMDb average rating for the title.
+        data_tests:
+          - not_null
+
+      - name: num_votes
+        description: Number of IMDb votes received by the title.
+        data_tests:
+          - not_null
+
+      - name: runtime_minutes
+        description: Runtime of the title in minutes, when available.
