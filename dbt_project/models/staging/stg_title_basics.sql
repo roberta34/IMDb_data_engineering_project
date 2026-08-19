@@ -13,7 +13,11 @@ renamed as (
         cast(isAdult as integer) as is_adult,
         cast(startYear as integer) as start_year,
         cast(endYear as integer) as end_year,
-        cast(runtimeMinutes as integer) as runtime_minutes,
+        case
+            when cast(runtimeMinutes as integer) > 0
+                then cast(runtimeMinutes as integer)
+            else null
+        end as runtime_minutes,
         cast(genres as varchar) as genres
 
     from source

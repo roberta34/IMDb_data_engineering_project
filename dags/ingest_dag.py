@@ -7,6 +7,7 @@ from airflow.utils.task_group import TaskGroup
 import duckdb
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 
 
 RAW_DIR = Path("/opt/airflow/raw")
@@ -355,10 +356,28 @@ with DAG(
             python_callable=register_imdb_sources_in_duckdb,
         )
 
+    with TaskGroup(group_id="transform") as transform_group:
+        dbt_run_task = BashOperator(
+            task_id="dbt_run",
+            bash_command=(
+                "cd /opt/airflow/dbt_project "
+                "&& dbt run --threads 1"
+            )
+        )
+    with TaskGroup(group_id="data_quality") as data_quality_group:
+        dbt_test_task = BashOperator(
+            task_id="dbt_test",
+            bash_command=(
+                "cd /opt/airflow/dbt_project "
+                "&& dbt test --threads 1"
+            )
+        )
     (
         prepare_directories_task
         >> extract_group
         >> convert_group
         >> validate_group
         >> load_group
+        >> transform_group
+        >> data_quality_group
     )
