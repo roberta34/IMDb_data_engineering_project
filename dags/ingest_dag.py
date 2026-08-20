@@ -357,13 +357,41 @@ with DAG(
         )
 
     with TaskGroup(group_id="transform") as transform_group:
-        dbt_run_task = BashOperator(
-            task_id="dbt_run",
+        dbt_run_staging_task = BashOperator(
+            task_id="dbt_run_staging",
             bash_command=(
                 "cd /opt/airflow/dbt_project "
-                "&& dbt run --threads 1"
+                "&& dbt run --select path:models/staging --threads 1"
             )
         )
+
+        dbt_snapshot_task = BashOperator(
+            task_id="dbt_snapshot",
+            bash_command=(
+                "cd /opt/airflow/dbt_project "
+                "&& dbt snapshot --threads 1"
+            )
+        )
+
+        dbt_run_dimensions_and_fact_task = BashOperator(
+            task_id="dbt_run_dimensions_and_fact",
+            bash_command=(
+                "cd /opt/airflow/dbt_project "
+                "&& dbt run "
+                "--select path:models/intermediate "
+                "path:models/dimensions "
+                "path:models/bridges "
+                "path:models/facts "
+                "--threads 1"
+            ),
+        )
+        (
+            dbt_run_staging_task
+            >> dbt_snapshot_task
+            >> dbt_run_dimensions_and_fact_task
+        )
+
+
     with TaskGroup(group_id="data_quality") as data_quality_group:
         dbt_test_task = BashOperator(
             task_id="dbt_test",
