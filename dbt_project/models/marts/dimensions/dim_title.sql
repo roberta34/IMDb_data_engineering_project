@@ -11,7 +11,11 @@ final as (
         original_title,
         title_type,
         is_adult,
-        start_year,
+        case
+            when start_year <= extract(year from current_date)
+                then start_year
+            else null
+        end as start_year,
         end_year,
         runtime_minutes,
         genres

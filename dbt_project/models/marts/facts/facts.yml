@@ -12,6 +12,10 @@ models:
         data_tests:
           - not_null
           - unique
+          - relationships:
+              arguments:
+                to: ref('dim_title')
+                field: title_id
 
       - name: year_key
         description: Year associated with the title, referencing dim_year.
@@ -25,6 +29,7 @@ models:
         description: IMDb average rating for the title.
         data_tests:
           - not_null
+          
 
       - name: num_votes
         description: Number of IMDb votes received by the title.
