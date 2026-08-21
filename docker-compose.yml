@@ -116,6 +116,7 @@ services:
 
     ports:
       - "8585:8080"
+      - "8086:8081"
 
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]

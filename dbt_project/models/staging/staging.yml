@@ -21,16 +21,16 @@ models:
         data_tests:
           - not_null
 
-      - name: stg_title_genres
-        description: Exploded staging model for IMDb title genres.
+  - name: stg_title_genres
+    description: Exploded staging model for IMDb title genres.
 
-        columns:
-          - name: title_id
-            description: IMDb title identifier.
-            data_tests:
-              - not_null
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+        data_tests:
+          - not_null
 
-          - name: genre_name
-            description: Individual genre associated with the title.
-            data_tests:
-              - not_null
+      - name: genre_name
+        description: Individual genre associated with the title.
+        data_tests:
+          - not_null
