@@ -43,3 +43,31 @@ models:
         data_tests:
           - not_null
           - unique
+
+  - name: mart_runtime_by_decade
+    description: >
+      Aggregated IMDb movie runtime and rating statistics by release decade.
+    columns:
+      - name: decade
+        description: Release decade of the movies.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: movie_count
+        description: Number of distinct movies in the decade.
+        data_tests:
+          - not_null
+
+      - name: average_runtime
+        description: Average runtime in minutes for movies in the decade.
+        data_tests:
+          - not_null
+
+      - name: average_rating
+        description: Average IMDb rating for movies in the decade.
+        data_tests:
+          - not_null
+
+      - name: runtime_rating_correlation
+        description: Pearson correlation between movie runtime and IMDb rating within the decade.
