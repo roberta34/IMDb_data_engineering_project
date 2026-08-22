@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: mart_top_directors
+    description: >
+      Final analytical mart containing the top 10 IMDb directors by average rating,
+      restricted to directors with at least 5 titles and at least 1000 combined votes.
+      Grain: one row per director.
+
+    columns:
+      - name: person_id
+        description: IMDb identifier of the director.
+        data_tests:
+          - not_null
+          - unique
+      - name: director_name
+        description: Primary name of the director.
+        data_tests:
+          - not_null
+
+      - name: title_count
+        description: Number of distinct rated titles associated with the director.
+        data_tests:
+          - not_null
+
+      - name: combined_votes
+        description: Total number of votes across all rated titles of the director.
+        data_tests:
+          - not_null
+
+      - name: average_rating
+        description: Simple average of IMDb ratings across the director's titles.
+        data_tests:
+          - not_null
+
+      - name: weighted_average_rating
+        description: Vote-weighted average rating across the director's titles.
+        data_tests:
+          - not_null
+
+      - name: rank
+        description: Position of the director in the final top 10 ranking.
+        data_tests:
+          - not_null
+          - unique
