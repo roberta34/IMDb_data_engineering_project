@@ -71,3 +71,43 @@ models:
 
       - name: runtime_rating_correlation
         description: Pearson correlation between movie runtime and IMDb rating within the decade.
+
+  - name: mart_genre_quality_analysis
+    description: >
+      Genre-level analysis comparing hidden gems and overrated IMDb titles.
+      Hidden gems are titles with average_rating >= 8.0 and
+      100 <= num_votes < 10000. Overrated titles have
+      average_rating <= 6.0 and num_votes >= 100000.
+      Genres with fewer than 100 titles are excluded to avoid unstable ratios.
+
+    columns:
+      - name: genre_name
+        description: IMDb genre name.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: title_count
+        description: Number of distinct rated titles in the genre.
+        data_tests:
+          - not_null
+
+      - name: hidden_gem_count
+        description: Number of titles classified as hidden gems.
+        data_tests:
+            - not_null
+
+      - name: overrated_count
+        description: Number of titles classified as overrated.
+        data_tests:
+            - not_null
+
+      - name: hidden_gem_ratio
+        description: Share of genre titles classified as hidden gems.
+        data_tests:
+            - not_null
+
+      - name: overrated_ratio
+        description: Share of genre titles classified as overrated.
+        data_tests:
+            - not_null
