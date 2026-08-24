@@ -118,6 +118,7 @@ models:
 
     columns:
       - name: person_id
+        description: IMDb identifier of the person.
         data_tests:
           - not_null
           - relationships:
@@ -126,10 +127,12 @@ models:
                 field: person_id
 
       - name: primary_name
+        description: Primary IMDb name of the person.
         data_tests:
           - not_null
 
       - name: role
+        description: Standardized role of the person, either actor or director.
         data_tests:
           - not_null
           - accepted_values:
@@ -137,21 +140,26 @@ models:
                 values: [ 'actor', 'director' ]
 
       - name: genre_name
+        description: IMDb genre associated with the person's titles.
         data_tests:
           - not_null
 
       - name: title_count
+        description: Number of distinct rated titles for the person within the role and genre.
         data_tests:
           - not_null
 
       - name: combined_votes
+        description: Total number of IMDb votes across the person's titles in the role and genre.
         data_tests:
           - not_null
 
       - name: average_rating
+        description: Simple average IMDb rating across the person's titles in the role and genre.
         data_tests:
           - not_null
 
       - name: weighted_average_rating
+        description: Vote-weighted average IMDb rating across the person's titles in the role and genre.
         data_tests:
           - not_null

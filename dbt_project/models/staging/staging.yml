@@ -1,6 +1,37 @@
 version: 2
 
 models:
+  - name: stg_title_basics
+    description: Clean staging model for IMDb title metadata.
+
+    columns:
+      - name: title_id
+        description: Unique IMDb title identifier.
+
+      - name: title_type
+        description: Type of the IMDb title, such as movie, short, or series.
+
+      - name: primary_title
+        description: Primary title used by IMDb.
+
+      - name: original_title
+        description: Original title of the production.
+
+      - name: is_adult
+        description: Indicates whether the title is adult content.
+
+      - name: start_year
+        description: Release or start year of the title.
+
+      - name: end_year
+        description: End year of the title, mainly applicable to series.
+
+      - name: runtime_minutes
+        description: Runtime of the title in minutes.
+
+      - name: genres
+        description: Original comma-separated genre list from IMDb.
+
   - name: stg_title_ratings
     description: Clean staging model for IMDb title ratings.
 
@@ -20,6 +51,107 @@ models:
         description: Number of votes received by the title.
         data_tests:
           - not_null
+
+  - name: stg_title_crew
+    description: Clean staging model for IMDb title directors and writers.
+
+    columns:
+      - name: title_id
+        description: Unique IMDb title identifier.
+
+      - name: directors
+        description: Comma-separated IMDb person identifiers for directors.
+
+      - name: writers
+        description: Comma-separated IMDb person identifiers for writers.
+
+  - name: stg_title_principals
+    description: Clean staging model for principal cast and crew associated with IMDb titles.
+
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+
+      - name: ordering
+        description: Ordering position of the principal credit for the title.
+
+      - name: person_id
+        description: IMDb person identifier.
+
+      - name: category
+        description: IMDb category describing the person's contribution.
+
+      - name: job
+        description: Specific job description when provided by IMDb.
+
+      - name: characters
+        description: Character information associated with the credit when available.
+
+  - name: stg_name_basics
+    description: Clean staging model for IMDb person metadata.
+
+    columns:
+      - name: person_id
+        description: Unique IMDb person identifier.
+
+      - name: primary_name
+        description: Primary IMDb name of the person.
+
+      - name: birth_year
+        description: Birth year of the person when available.
+
+      - name: death_year
+        description: Death year of the person when available.
+
+      - name: primary_professions
+        description: Comma-separated list of the person's primary professions.
+
+      - name: known_for_titles
+        description: Comma-separated list of IMDb titles the person is known for.
+
+  - name: stg_title_akas
+    description: Clean staging model for IMDb alternative title metadata.
+
+    columns:
+      - name: title_id
+        description: IMDb title identifier.
+
+      - name: ordering
+        description: Ordering value of the alternative title.
+
+      - name: title
+        description: Alternative title text.
+
+      - name: region
+        description: Region associated with the alternative title.
+
+      - name: language
+        description: Language associated with the alternative title.
+
+      - name: types
+        description: IMDb classification of the alternative title.
+
+      - name: attributes
+        description: Additional IMDb attributes associated with the alternative title.
+
+      - name: is_original_title
+        description: Indicates whether this is the original title.
+
+  - name: stg_title_episode
+    description: Clean staging model linking IMDb episodes to their parent series.
+
+    columns:
+      - name: title_id
+        description: IMDb identifier of the episode.
+
+      - name: parent_title_id
+        description: IMDb identifier of the parent series.
+
+      - name: season_number
+        description: Season number of the episode when available.
+
+      - name: episode_number
+        description: Episode number within the season when available.
 
   - name: stg_title_genres
     description: Exploded staging model for IMDb title genres.
