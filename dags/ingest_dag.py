@@ -385,10 +385,19 @@ with DAG(
                 "--threads 1"
             ),
         )
+
+        dbt_run_marts_task = BashOperator(
+            task_id="dbt_run_marts",
+            bash_command = (
+                "cd /opt/airflow/dbt_project "
+                "&& dbt run --select path:models/marts --threads 1"
+            )
+        )
         (
             dbt_run_staging_task
             >> dbt_snapshot_task
             >> dbt_run_dimensions_and_fact_task
+            >> dbt_run_marts_task
         )
 
 
@@ -400,6 +409,15 @@ with DAG(
                 "&& dbt test --threads 1"
             )
         )
+
+    with TaskGroup(group_id="documentation") as documentation_group:
+        generate_dbt_docs_task = BashOperator(
+            task_id="generate_dbt_docs",
+            bash_command=(
+                "cd /opt/airflow/dbt_project "
+                "&& dbt docs generate --threads 1"
+            )
+        )
     (
         prepare_directories_task
         >> extract_group
@@ -408,4 +426,5 @@ with DAG(
         >> load_group
         >> transform_group
         >> data_quality_group
+        >> documentation_group
     )
