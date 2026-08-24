@@ -111,3 +111,47 @@ models:
         description: Share of genre titles classified as overrated.
         data_tests:
             - not_null
+  - name: mart_person_genre_performance
+    description: >
+      Performance by person, role, and genre for actors and directors
+      over the last 20 years.
+
+    columns:
+      - name: person_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_person')
+                field: person_id
+
+      - name: primary_name
+        data_tests:
+          - not_null
+
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [ 'actor', 'director' ]
+
+      - name: genre_name
+        data_tests:
+          - not_null
+
+      - name: title_count
+        data_tests:
+          - not_null
+
+      - name: combined_votes
+        data_tests:
+          - not_null
+
+      - name: average_rating
+        data_tests:
+          - not_null
+
+      - name: weighted_average_rating
+        data_tests:
+          - not_null
